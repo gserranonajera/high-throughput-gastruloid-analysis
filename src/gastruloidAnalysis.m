@@ -69,9 +69,19 @@ classdef gastruloidAnalysis < handle
             % default parameters
             if ~exist('param','var') || isempty(param)
                 gA.param = struct();
-                gA.param.cellpose_downsize = 0.1; % factor for image reduction to segment full gastruloid bodies using cellpose
+
+                % general paramenters
                 gA.param.plate_mode = false; % true if 96 well plate, false if dishes
                 gA.param.workers = 20; % number of cores for parallel processing
+
+                % imaging channels
+                gA.param.channel_names = {'BF'};
+                gA.param.n_channels = length(param.channel_names);
+
+                % parameters for cellpose gastruloid segmentation
+                gA.param.cellpose_model = 'CP_protrusion_v05'; % pretrained cellpose model to use
+                gA.param.cellpose_diameter = 200; % diameter for cellpose
+                gA.param.cellpose_downsize = 0.1; % factor for image reduction to segment full gastruloid bodies using cellpose
                 
                 % parameters for cell probability segmentation
                 gA.param.probmask.thr = 0.35; % 0.35 minimum probability to find a cell
@@ -551,10 +561,14 @@ classdef gastruloidAnalysis < handle
 
             if ~exist('model_name', 'var') || isempty(model_name)
                 model_name = 'CP_protrusion_v05';
+            else
+                model_name = gA.param.cellpose_model;
             end
             
             if ~exist('diameter', 'var') || isempty(diameter)
                 diameter = 200;
+            else
+                diameter = gA.param.cellpose_diameter;
             end
 
             if ~exist('indices', 'var') || isempty(indices)
